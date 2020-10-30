@@ -1,27 +1,41 @@
+%Written by James Curtis Addy
+
+%State the file name, bytes per timestamp, number of sensors, and how many times to average the sensor values.
 filename =  'BC_DD_C2_81_05_2A_2018-07-01.bin';
-bytes_per_period = 68;
+bytes_per_timestamp = 68;
 number_of_sensors = 6;
+times_averaged = 10;
 
+%Open the file and read the data from it.
 fid = fopen(filename);
-d = fread(fid);
+data = fread(fid);
 fclose(fid);
-d = reshape(d, bytes_per_period, []);
-d = transpose(d);
 
-millis_bytes = d(:, 3:6);
-millis_bytes(1:5, :)
-sensor_values = d(:,9:end);
+%Rearrange the data so that the milliseconds timestamps and sensor data
+%are organized in columns.
+data = reshape(d, bytes_per_timestamp, []);
+data = transpose(d);
+
+%Grab the bytes representing the milliseconds timestamps from the data matrix (columns 3,4,5,6)
+millis_bytes = data(:, 3:6);
+
+%Grab the sensor values from the data matrix (columns 9 to end)
+sensor_values = data(:,9:end);
+
+%Arrange the sensor values into a single column
 sensor_values = transpose(sensor_values);
 sensor_values = sensor_values(:);
+
+%Stack the values so that each column contains the values for the respective sensors.
+%Column1 values will be sensor1's readings, column2 will be sensor2's, and so forth.
 row_count = size(sensor_values, 1) / number_of_sensors;
-sensor_values = reshape(sensor_values, number_of_sensors, row_count);
-sensor_values = transpose(sensor_values);
+sensor_values = reshape(sensor_values, row_count, number_of_sensors);
 
+%Convert each 4 byte sequence of millis_bytes into a single 32bit value.
+%This 32 bit value is the timestamp in milliseconds.
 millis_values = convert_ms_bytes_to_decimal(uint32(millis_bytes));
-millis_values(1:5)
 
-%Average data
-times_averaged = 10;
+%Average data based on the times_averaged.
 number_of_rows = size(sensor_values,1) / times_averaged;
 averaged_matrix = zeros(number_of_rows, number_of_sensors);
 for i = 1:number_of_sensors
@@ -31,9 +45,15 @@ for i = 1:number_of_sensors
     averaged_matrix(:,i) = averaged_readings;
 end
 sensor_values = averaged_matrix;
+
+%Normalize the data using the minimum of each column subtracted from its respective column.
 normalized_values = sensor_values - min(sensor_values);
+
+%Plot the values.
 plot(normalized_values);
 
+%This function shifts the milliseconds byte values into the proper position inside the 32 bit integers.
+%Functions need to be at the bottom of the script.
 function values = convert_ms_bytes_to_decimal(millis_bytes)
     values = zeros(size(millis_bytes, 1), 1);
     for i = 1:size(values,1)
