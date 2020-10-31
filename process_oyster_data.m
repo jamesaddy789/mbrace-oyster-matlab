@@ -1,20 +1,20 @@
 %Written by James Curtis Addy
 
 %State the file name, bytes per timestamp, number of sensors, and how many times to average the sensor values.
-filename =  'BC_DD_C2_81_05_2A_2018-07-01.bin';
+file_name =  'BC_DD_C2_81_05_2A_2018-07-01.bin';
 bytes_per_timestamp = 68;
 number_of_sensors = 6;
 times_averaged = 10;
 
 %Open the file and read the data from it.
-fid = fopen(filename);
-data = fread(fid);
-fclose(fid);
+file_id = fopen(file_name);
+data = fread(file_id);
+fclose(file_id);
 
 %Rearrange the data so that the milliseconds timestamps and sensor data
 %are organized in columns.
-data = reshape(d, bytes_per_timestamp, []);
-data = transpose(d);
+data = reshape(data, bytes_per_timestamp, []);
+data = transpose(data);
 
 %Grab the bytes representing the milliseconds timestamps from the data matrix (columns 3,4,5,6)
 millis_bytes = data(:, 3:6);
