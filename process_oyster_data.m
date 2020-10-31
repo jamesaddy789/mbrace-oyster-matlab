@@ -33,7 +33,7 @@ sensor_values = reshape(sensor_values, row_count, number_of_sensors);
 
 %Convert each 4 byte sequence of millis_bytes into a single 32bit value.
 %This 32 bit value is the timestamp in milliseconds.
-millis_values = convert_ms_bytes_to_decimal(uint32(millis_bytes));
+millis_values = convert_ms_bytes_to_integer(uint32(millis_bytes));
 
 %Average data based on the times_averaged.
 number_of_rows = size(sensor_values,1) / times_averaged;
@@ -54,7 +54,7 @@ plot(normalized_values);
 
 %This function shifts the milliseconds byte values into the proper position inside the 32 bit integers.
 %Functions need to be at the bottom of the script.
-function values = convert_ms_bytes_to_decimal(millis_bytes)
+function values = convert_ms_bytes_to_integer(millis_bytes)
     values = zeros(size(millis_bytes, 1), 1);
     for i = 1:size(values,1)
         %This method uses bitshifting to set the bits of the 32 bit value
